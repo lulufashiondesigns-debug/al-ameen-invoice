@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#163b66">
+<title>AL AMEEN CARS — AI Voice Invoice</title>
+<style>
+:root{--blue:#245b91;--dark:#163b66;--line:#a8c3dc;--ink:#172638;--muted:#5d6b78;--bg:#eef3f8;--red:#a42c2c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Arial,Helvetica,sans-serif}
+header{background:var(--dark);color:white;padding:18px 16px}header .wrap,main{max-width:1100px;margin:auto}header h1{font-size:22px;margin:0;letter-spacing:1px}header p{font-size:13px;margin:4px 0 0;opacity:.9}
+main{padding:14px}.panel{background:white;border:1px solid #d5e0ea;border-radius:12px;padding:15px;margin-bottom:13px;box-shadow:0 2px 8px #102b4510}
+h2{font-size:17px;color:var(--dark);margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.field{display:flex;flex-direction:column;gap:5px}
+label{font-size:12px;color:var(--muted);font-weight:bold}input,select,textarea,button{font:inherit}input,select,textarea{width:100%;min-width:0;padding:10px;border:1px solid #bdcbd8;border-radius:7px;background:white;color:var(--ink)}
+button{border:0;border-radius:8px;padding:11px 14px;background:var(--blue);color:white;font-weight:bold;cursor:pointer}button.secondary{background:#e5edf5;color:var(--dark);border:1px solid #c5d5e4}button.danger{background:#fff0f0;color:var(--red);border:1px solid #efcaca}button:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}.voice{background:#f4f8fc;border:1px dashed #9ab6d1;border-radius:10px;padding:12px}.status{font-size:13px;color:var(--muted);margin-top:8px;overflow-wrap:anywhere}
+.hint,.small{font-size:12px;color:var(--muted)}.hint{margin:8px 0 0}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:700px}th,td{border:1px solid var(--line);padding:7px;vertical-align:top}th{background:#eaf2f9;color:var(--dark);font-size:12px;text-align:left}td input{border:0;padding:6px;background:transparent}td input:focus{outline:1px solid var(--blue)}td.amount,td.sno{text-align:right;padding-top:14px;font-weight:bold}td.sno{text-align:center}
+.total{display:flex;justify-content:flex-end;gap:18px;align-items:center;margin-top:12px;font-size:20px;font-weight:bold}.pill{display:inline-block;border-radius:20px;padding:3px 8px;background:#e5edf5;color:var(--dark);font-size:11px;font-weight:bold}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 14px 24px}
+@media(max-width:720px){main{padding:9px}.panel{padding:11px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}header h1{font-size:19px}.actions button{flex:1 1 140px}}
+@media(max-width:390px){.grid{grid-template-columns:1fr}}
+#printArea{display:none}@page{size:A4 portrait;margin:12mm}
+@media print{body{background:white}body>*{display:none!important}#printArea{display:block!important}.print-invoice{font:10pt Arial,sans-serif;color:#111}.p-head{text-align:center;border-bottom:2px solid #7298bc;padding-bottom:8px}.p-head h1{font-size:25pt;letter-spacing:2px;color:#28639a;margin:0}.p-head h2{font-size:14pt;letter-spacing:3px;color:#28639a;margin:0}.p-head p{margin:5px 0 0;font-size:9pt}.p-meta{display:flex;justify-content:space-between;margin:18px 0 12px}.p-vehicle{border-bottom:1px dotted #7195b8;padding-bottom:8px}.print-invoice table{min-width:0;width:100%;table-layout:fixed;border-collapse:collapse}.print-invoice th,.print-invoice td{border:1px solid #7195b8;padding:7px 5px;font-size:9pt;overflow-wrap:anywhere}.print-invoice th{background:white;color:#28639a;text-align:center}.p-sno{width:8%}.p-desc{width:49%}.p-qty{width:10%}.p-rate{width:15%}.p-amount{width:18%}.p-desc-cell{white-space:pre-wrap}.p-total{text-align:right;font-weight:bold;padding-top:10px;font-size:11pt}.p-bottom{display:flex;justify-content:space-between;margin-top:24px;color:#28639a}.p-sign{text-align:right;min-width:130px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>AL AMEEN CARS SERVICE CENTER</h1><p>Voice Invoice Assistant · English + தமிழ் · Android & Windows</p></div></header>
+<main>
+<section class="panel">
+<h2>Invoice details</h2><div class="grid">
+<div class="field"><label>INVOICE NO.</label><input id="invoiceNo" value="1088"></div>
+<div class="field"><label>DATE</label><input id="invoiceDate" placeholder="DD.MM.YYYY"></div>
+<div class="field"><label>VEHICLE NO.</label><input id="vehicleNo" placeholder="e.g. KA 53-MD 0011"></div>
+<div class="field"><label>CUSTOMER (OPTIONAL)</label><input id="customerName" placeholder="Customer name"></div>
+</div><p class="hint">Vattappara Hill Top, Kanhpippura, Valanchery, Malappuram Dist. · Tel: 0494 2644 455, 9895 235 973</p>
+</section>
+<section class="panel">
+<h2>Voice commands <span class="pill">Mixed Tamil + English</span></h2>
+<div class="voice">
+<div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+<div class="field"><label>Speech recognition language</label><select id="speechLang"><option value="en-IN">English (India)</option><option value="ta-IN">Tamil (India)</option></select></div>
+<div class="field"><label>Command mode</label><select id="commandMode"><option value="add">Add spoken item</option><option value="edit">Edit/reorder command</option></select></div>
+</div>
+<div class="actions"><button id="startVoice">🎙️ Start listening</button><button id="stopVoice" class="secondary" disabled>Stop listening</button><button id="applyCommand" class="secondary">Apply transcript</button></div>
+<div id="voiceStatus" class="status" role="status">Press Start listening and speak. Use one item or command at a time.</div>
+<textarea id="transcript" rows="3" style="margin-top:9px" placeholder="Recognized words appear here. You can edit the transcript before applying it."></textarea>
+<p class="hint"><b>Add item examples:</b> “Breakdown service, quantity one, rate one thousand rupees.” / “பிரேக்டவுன் சர்வீஸ், அளவு ஒன்று, ரேட் ஆயிரம்.”<br><b>Edit examples:</b> “Change item 1 description to breakdown service”; “Move item 5 under item 3”; “Delete item 4”; “Set item 2 rate to 2500”.</p>
+</div>
+</section>
+<section class="panel">
+<h2>Invoice items</h2><div class="table-wrap"><table><thead><tr><th style="width:52px">S.No</th><th>Description</th><th style="width:78px">Qty</th><th style="width:120px">Rate (₹)</th><th style="width:130px">Amount (₹)</th><th style="width:65px">Remove</th></tr></thead><tbody id="itemsBody"></tbody></table></div>
+<div class="total"><span>Total</span><span id="grandTotal">₹0.00</span></div>
+<div class="actions"><button id="addRow" class="secondary">＋ Add item</button><button id="saveDraft" class="secondary">Save draft on this device</button><button id="loadDraft" class="secondary">Load draft</button><button id="exportBackup" class="secondary">Export backup JSON</button><button id="importBackup" class="secondary">Import backup JSON</button><input id="backupFile" type="file" accept=".json,application/json" hidden><button id="pdfButton">Generate / Save PDF</button></div>
+<p class="hint">Drafts are stored only in this browser/device. Export a JSON backup to transfer data manually. PDF opens the print dialog; choose “Save as PDF”.</p>
+</section>
+</main>
+<footer>Single-file app · Invoice data stays in your browser unless you export/share it.</footer>
+<section id="printArea"><div class="print-invoice">
+<div class="p-head"><h1>AL AMEEN CARS</h1><h2>SERVICE CENTER</h2><p>Vattappara Hill Top, Kanhpippura, Valanchery, Malappuram Dist.</p><p>Tel: 0494 2644 455, 9895 235 973</p></div>
+<div class="p-meta"><span><b>No:</b> <span id="pInvoiceNo"></span></span><span><b>Date:</b> <span id="pDate"></span></span></div>
+<div class="p-vehicle"><b>To / Vehicle No.:</b> <span id="pVehicle"></span><span id="pCustomer"></span></div>
+<table><thead><tr><th class="p-sno">Sl.No</th><th class="p-desc">Particulars</th><th class="p-qty">Qty</th><th class="p-rate">Rate (₹)</th><th class="p-amount">Amount (₹)</th></tr></thead><tbody id="printItems"></tbody></table>
+<div class="p-total">Total: <span id="pTotal"></span></div><div class="p-bottom"><span>E. & O.E.</span><span class="p-sign">Signature</span></div>
+</div></section>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), body=$('itemsBody');
+const fmt=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+const tamilNums={'ஒன்று':1,'ஒரு':1,'ஒன்னு':1,'ரெண்டு':2,'இரண்டு':2,'மூன்று':3,'நான்கு':4,'ஐந்து':5,'ஆறு':6,'ஏழு':7,'எட்டு':8,'ஒன்பது':9,'பத்து':10,'இருபது':20,'முப்பது':30,'நாற்பது':40,'ஐம்பது':50,'அறுபது':60,'எழுபது':70,'எண்பது':80,'தொண்ணூறு':90,'நூறு':100,'ஆயிரம்':1000,'ஆயிரத்து':1000,'ஐநூறு':500,'ஐந்நூறு':500};
+const englishNums={'zero':0,'one':1,'a':1,'an':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10,'eleven':11,'twelve':12,'thirteen':13,'fourteen':14,'fifteen':15,'sixteen':16,'seventeen':17,'eighteen':18,'nineteen':19,'twenty':20,'thirty':30,'forty':40,'fifty':50,'sixty':60,'seventy':70,'eighty':80,'ninety':90,'hundred':100,'thousand':1000,'lakh':100000};
+function num(s){s=String(s||'').toLowerCase().replace(/[₹,]/g,' ').trim();let m=s.match(/\d+(?:\.\d+)?/);if(m)return Number(m[0]);let total=0,part=0,found=false;for(let w of s.split(/[\s-]+/)){let n=englishNums[w]??tamilNums[w];if(n===undefined)continue;found=true;if(n===100||n===1000||n===100000){part=(part||1)*n;if(n>100){total+=part;part=0}}else part+=n}return found?total+part:NaN}
+function getRows(){return [...body.querySelectorAll('tr')].map(tr=>({description:tr.querySelector('.desc').value.trim(),qty:Number(tr.querySelector('.qty').value)||0,rate:Number(tr.querySelector('.rate').value)||0}))}
+function renumber(){[...body.querySelectorAll('tr')].forEach((tr,i)=>tr.querySelector('.sno').textContent=i+1)}
+function update(){let total=0;[...body.querySelectorAll('tr')].forEach(tr=>{let q=Number(tr.querySelector('.qty').value)||0,r=Number(tr.querySelector('.rate').value)||0,a=q*r;total+=a;tr.querySelector('.amount').textContent=fmt(a)});$('grandTotal').textContent=fmt(total)}
+function addRow(item={}){let tr=document.createElement('tr');tr.innerHTML='<td class="sno"></td><td><input class="desc" aria-label="Description" placeholder="Description"></td><td><input class="qty" type="number" min="0" step="any" aria-label="Quantity"></td><td><input class="rate" type="number" min="0" step="any" aria-label="Rate"></td><td class="amount">₹0.00</td><td><button class="danger remove" type="button">✕</button></td>';tr.querySelector('.desc').value=item.description||'';tr.querySelector('.qty').value=item.qty??1;tr.querySelector('.rate').value=item.rate??'';tr.querySelectorAll('input').forEach(x=>x.addEventListener('input',update));tr.querySelector('.remove').onclick=()=>{tr.remove();renumber();update()};body.appendChild(tr);renumber();update()}
+function sayStatus(s){$('voiceStatus').textContent=s}
+function itemDescription(s){return s.replace(/(?:serial\s*number|item|number|சீரியல்\s*நம்பர்|வரிசை\s*எண்)\s*(?:\d+|[a-z]+)?/ig,' ').replace(/(?:quantity|qty|அளவு|க்யூட்டி)\s*[:\-]?\s*[\w.]+/ig,' ').replace(/(?:rate|price|ரேட்|விலை|ரூபாய்|ரூ)\s*[:\-]?\s*[\w.]+/ig,' ').replace(/^\s*(?:add|create|item|சேர்)\s*/i,'').replace(/[,:;\s]+$/,'').trim()}
+function applyTranscript(){
+ const raw=$('transcript').value.trim();if(!raw){sayStatus('No transcript yet. Speak or type a command.');return}
+ const s=raw.toLowerCase().replace(/[₹,]/g,' ').trim();
+ if($('commandMode').value==='edit'){
+  let m;
+  if((m=s.match(/(?:move|merge)\s+(?:item\s*)?(\d+)\s+(?:under|to|into|with)\s+(?:item\s*)?(\d+)/i)) || (m=s.match(/(?:ஐட்டம்|உருப்படி)\s*(\d+).*?(?:ஐட்டம்|உருப்படி)\s*(\d+)/i))){
+   const from=Number(m[1])-1,to=Number(m[2])-1,trs=[...body.querySelectorAll('tr')];if(trs[from]&&trs[to]&&from!==to){const source=trs[from],target=trs[to];target.querySelector('.desc').value=(target.querySelector('.desc').value+'; '+source.querySelector('.desc').value).replace(/^;\s*/,'');source.remove();renumber();update();sayStatus('Moved item description into target item. Check the result.')}else sayStatus('Could not find both item numbers.');return;
+  }
+  if((m=s.match(/(?:delete|remove)\s+(?:item\s*)?(\d+)/i))){const tr=body.querySelectorAll('tr')[Number(m[1])-1];if(tr){tr.remove();renumber();update();sayStatus('Item deleted.');}else sayStatus('Item number not found.');return}
+  if((m=s.match(/(?:set|change)\s+(?:item\s*)?(\d+)\s+(?:rate|price)\s+(?:to\s+)?(.+)/i))){const tr=body.querySelectorAll('tr')[Number(m[1])-1],n=num(m[2]);if(tr&&Number.isFinite(n)){tr.querySelector('.rate').value=n;update();sayStatus('Rate updated. Please verify.')}else sayStatus('Could not read item number or rate.');return}
+  if((m=s.match(/(?:set|change)\s+(?:item\s*)?(\d+)\s+(?:quantity|qty)\s+(?:to\s+)?(.+)/i))){const tr=body.querySelectorAll('tr')[Number(m[1])-1],n=num(m[2]);if(tr&&Number.isFinite(n)){tr.querySelector('.qty').value=n;update();sayStatus('Quantity updated. Please verify.')}else sayStatus('Could not read quantity.');return}
+  if((m=raw.match(/(?:change|set)\s+(?:item\s*)?(\d+)\s+(?:description\s+to|description|விளக்கம்)\s+(.+)/i))){const tr=body.querySelectorAll('tr')[Number(m[1])-1];if(tr){tr.querySelector('.desc').value=m[2].trim();update();sayStatus('Description updated. Please verify.')}else sayStatus('Item number not found.');return}
+  sayStatus('Command not recognized. Try: “Change item 1 description to breakdown service” or switch to Add spoken item.');return
+ }
+ // Extract quantity and rate from common English/Tamil labels.
+ let q=1,r=NaN;
+ let qm=s.match(/(?:quantity|qty|அளவு|க்யூட்டி)\s*(?:is|to|[:\-])?\s*([a-z0-9. -]+?)(?=\s*(?:rate|price|ரேட்|விலை|$))/i);
+ let rm=s.match(/(?:rate|price|ரேட்|விலை|ரூபாய்|ரூ)\s*(?:is|to|[:\-])?\s*(.+)$/i);
+ if(qm)q=num(qm[1]);if(rm)r=num(rm[1]);
+ // If no labels, accept a final “for 1000 rupees” pattern.
+ if(!Number.isFinite(r)){let m=s.match(/(?:at|for|ரூபாய்)\s+(.+?)(?:\s+rupees?)?$/i);if(m)r=num(m[1])}
+ let desc=itemDescription(raw);
+ // Keep transcript text if parser would otherwise remove too much.
+ if(desc.length<2)desc=raw;
+ addRow({description:desc,qty:Number.isFinite(q)&&q>=0?q:1,rate:Number.isFinite(r)&&r>=0?r:''});
+ sayStatus('Added one row. Please verify the description, quantity and rate; edit any mistakes in the table.');
+}
+$('applyCommand').onclick=applyTranscript;
+let SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,listening=false,stopAsked=false,finalText='';
+function ui(active,msg){listening=active;$('startVoice').disabled=active;$('stopVoice').disabled=!active;if(msg)sayStatus(msg)}
+$('startVoice').onclick=()=>{if(!SR){sayStatus('Speech recognition is unavailable in this browser. Try current Chrome on HTTPS, or type your command.');return}try{if(rec){rec.onend=null;rec.onerror=null;try{rec.abort()}catch(e){}}rec=new SR();rec.lang=$('speechLang').value;rec.continuous=true;rec.interimResults=true;finalText='';stopAsked=false;rec.onstart=()=>ui(true,'Listening… speak now. Tap Stop listening when finished.');rec.onresult=e=>{let interim='';for(let i=0;i<e.results.length;i++){if(e.results[i].isFinal)finalText+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript} $('transcript').value=(finalText+interim).trim()};rec.onerror=e=>{
+ if(e.error==='no-speech'){
+  // Keep listening after silence; some mobile browsers end a recognition session after a pause.
+  sayStatus('No speech detected yet. Keep speaking, or tap Stop listening when finished.');
+  return;
+ }
+ stopAsked=true;
+ ui(false,e.error==='not-allowed'?'Microphone blocked. Use HTTPS hosting and allow microphone permission.':e.error==='network'?'Speech service needs internet. Check your connection.':'Speech error: '+e.error+'. You can type the command.');
+ rec=null;
+};
+rec.onend=()=>{
+ if(listening && !stopAsked && rec){
+  const previous=rec;
+  setTimeout(()=>{
+   if(listening && !stopAsked && rec===previous){
+    try{previous.start();}catch(err){rec=null;ui(false,'Listening ended. Tap Start listening to try again.');}
+   }
+  },350);
+ }else{
+  rec=null;
+  ui(false,'Listening stopped. Review the transcript, then tap Apply transcript.');
+ }
+};
+rec.start();ui(true,'Starting microphone… keep the page open while speaking.')}catch(e){rec=null;ui(false,'Could not start voice recognition. Check permission and try again.')}}
+$('stopVoice').onclick=()=>{stopAsked=true;if(rec){sayStatus('Stopping…');try{rec.stop()}catch(e){try{rec.abort()}catch(ignore){}rec=null;ui(false,'Stopped. Review transcript.')}}else ui(false,'Microphone is already stopped.')};
+function preparePrint(){const val=id=>$(id).value;$('pInvoiceNo').textContent=val('invoiceNo');$('pDate').textContent=val('invoiceDate');$('pVehicle').textContent=val('vehicleNo');$('pCustomer').textContent=val('customerName')?' · Customer: '+val('customerName'):'';let t=$('printItems');t.innerHTML='';let total=0;getRows().filter(x=>x.description||x.rate||x.qty!==1).forEach((r,i)=>{let a=r.qty*r.rate;total+=a;let tr=document.createElement('tr');[i+1,r.description,r.qty,r.rate?Number(r.rate).toLocaleString('en-IN'):'',a.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})].forEach((v,j)=>{let td=document.createElement('td');td.textContent=v;if(j===1)td.className='p-desc-cell';tr.appendChild(td)});t.appendChild(tr)});$('pTotal').textContent=fmt(total);window.print()}
+$('pdfButton').onclick=preparePrint;$('addRow').onclick=()=>addRow();
+function snapshot(){return {version:1,invoiceNo:$('invoiceNo').value,invoiceDate:$('invoiceDate').value,vehicleNo:$('vehicleNo').value,customerName:$('customerName').value,items:getRows()}}
+function restore(d){$('invoiceNo').value=d.invoiceNo||'';$('invoiceDate').value=d.invoiceDate||'';$('vehicleNo').value=d.vehicleNo||'';$('customerName').value=d.customerName||'';body.innerHTML='';(d.items||[]).forEach(addRow);update()}
+$('saveDraft').onclick=()=>{try{localStorage.setItem('alAmeenInvoiceDraft',JSON.stringify(snapshot()));sayStatus('Draft saved in this browser on this device.')}catch(e){sayStatus('Could not save draft. Export a JSON backup instead.')}}
+$('loadDraft').onclick=()=>{try{let d=JSON.parse(localStorage.getItem('alAmeenInvoiceDraft')||'null');if(d){restore(d);sayStatus('Draft loaded.')}else sayStatus('No saved draft found in this browser.')}catch(e){sayStatus('Saved draft could not be read.')}}
+$('exportBackup').onclick=()=>{let blob=new Blob([JSON.stringify(snapshot(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='al-ameen-invoice-backup.json';a.click();URL.revokeObjectURL(a.href);sayStatus('Backup JSON exported. Store it safely.')}
+$('importBackup').onclick=()=>$('backupFile').click();$('backupFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(!Array.isArray(d.items))throw Error('invalid');restore(d);sayStatus('Backup imported. Please verify all values.')}catch(err){sayStatus('Invalid backup file.')}e.target.value=''}
+const now=new Date();$('invoiceDate').value=String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear();
+[
+{description:'Breakdown service',qty:1,rate:1000},
+{description:'Accident works with labor, Suspension working, Cross member pulling',qty:1,rate:22500},
+{description:'Alloy wheel repair & painting works 4 piece; Drum painting, Resetting',qty:1,rate:12500},
+{description:'Axle repair & setting',qty:1,rate:''},
+{description:'Service & individual works/washing',qty:1,rate:2000}
+].forEach(addRow);
+})();
+</script></body></html>
