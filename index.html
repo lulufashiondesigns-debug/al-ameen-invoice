@@ -105,20 +105,18 @@ function applyTranscript(){
 $('applyCommand').onclick=applyTranscript;
 let SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,listening=false,stopAsked=false,finalText='';
 function ui(active,msg){listening=active;$('startVoice').disabled=active;$('stopVoice').disabled=!active;if(msg)sayStatus(msg)}
-$('startVoice').onclick=()=>{if(!SR){sayStatus('Speech recognition is unavailable in this browser. Try current Chrome on HTTPS, or type your command.');return}try{if(rec){rec.onend=null;rec.onerror=null;try{rec.abort()}catch(e){}}rec=new SR();rec.lang=$('speechLang').value;rec.continuous=true;rec.interimResults=true;finalText='';stopAsked=false;rec.onstart=()=>ui(true,'Listening… speak one item or command. Tap Stop listening when finished.');rec.onresult=e=>{
- // SpeechRecognition repeats earlier results in event.results. Process only new results,
- // otherwise one spoken phrase can become "item item item..." in the transcript.
- let interim='';
- for(let i=e.resultIndex;i<e.results.length;i++){
+$('startVoice').onclick=()=>{if(!SR){sayStatus('Speech recognition is unavailable in this browser. Try current Chrome on HTTPS, or type your command.');return}try{if(rec){rec.onend=null;rec.onerror=null;try{rec.abort()}catch(e){}}rec=new SR();rec.lang=$('speechLang').value;rec.continuous=false;rec.interimResults=true;finalText='';stopAsked=false;rec.onstart=()=>ui(true,'Listening… speak one item or command. Tap Stop listening when finished.');rec.onresult=e=>{
+ // One speech session captures one command. Replace the displayed recognition result
+ // rather than appending the same final result repeatedly across browser events.
+ let latestFinal='', latestInterim='';
+ for(let i=0;i<e.results.length;i++){
   const result=e.results[i];
   const spoken=(result[0].transcript||'').trim();
-  if(result.isFinal){
-   if(spoken) finalText+=(finalText?' ':'')+spoken;
-  }else{
-   interim=spoken;
-  }
+  if(result.isFinal){if(spoken) latestFinal=spoken;}
+  else if(spoken) latestInterim=spoken;
  }
- $('transcript').value=(finalText+(interim?(finalText?' ':'')+interim:'')).trim();
+ if(latestFinal) finalText=latestFinal;
+ $('transcript').value=(finalText || latestInterim).trim();
 };rec.onerror=e=>{
  if(e.error==='no-speech'){
   // Keep listening after silence; some mobile browsers end a recognition session after a pause.
@@ -130,17 +128,8 @@ $('startVoice').onclick=()=>{if(!SR){sayStatus('Speech recognition is unavailabl
  rec=null;
 };
 rec.onend=()=>{
- if(listening && !stopAsked && rec){
-  const previous=rec;
-  setTimeout(()=>{
-   if(listening && !stopAsked && rec===previous){
-    try{previous.start();}catch(err){rec=null;ui(false,'Listening ended. Tap Start listening to try again.');}
-   }
-  },350);
- }else{
-  rec=null;
-  ui(false,'Listening stopped. Review the transcript, then tap Apply transcript.');
- }
+ rec=null;
+ ui(false,stopAsked?'Listening stopped. Review the transcript.':'Speech captured. Review the transcript, then tap Apply transcript. Tap Start listening for the next item.');
 };
 rec.start();ui(true,'Starting microphone… keep the page open while speaking.')}catch(e){rec=null;ui(false,'Could not start voice recognition. Check permission and try again.')}}
 $('stopVoice').onclick=()=>{stopAsked=true;if(rec){sayStatus('Stopping…');try{rec.stop()}catch(e){try{rec.abort()}catch(ignore){}rec=null;ui(false,'Stopped. Review transcript.')}}else ui(false,'Microphone is already stopped.')};
